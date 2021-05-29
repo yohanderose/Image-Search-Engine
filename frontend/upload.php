@@ -69,9 +69,15 @@ $options = array(
 );
 $context  = stream_context_create($options);
 $result = file_get_contents($url, false, $context);
-if ($result === FALSE) { /* Handle error */ }
 
-// var_dump($result);
 
 // Remove uploaded file from server
 unlink($target_file);
+
+$newURL = "http://ec2-3-235-253-98.compute-1.amazonaws.com/upload.php"
+if ($result === FALSE) { 
+	echo 'Errors encountered'
+} else {
+	header('Location: '.$newURL);
+}
+
