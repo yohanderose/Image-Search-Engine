@@ -109,7 +109,7 @@
 
     <div class="topnav">
       <input type="text" name="query" id="query" placeholder="Search..">
-      <input id="search-submit" type="button" value="Submit">
+      <input id="search-submit" type="button" value="Go">
 
     </div>
 
@@ -123,11 +123,7 @@
 
 
   <div id="container">
-    <div class="box">
-      <!-- <img src="https://image-store-5225.s3.amazonaws.com/000000007454.jpg"> -->
-    </div>
-    <div class="box"> </div>
-    <div class="box"> </div>
+
 
     <span class="stretch"></span>
   </div>
@@ -136,7 +132,32 @@
 
     $('#search-submit').on('click', () => {
 var queryString = $('#query').val();
-      console.log(queryString);
+
+      $.ajax({
+    type: 'POST',
+    data: { query: queryString,
+          },
+    url: 'query.php',
+    dataType: 'json',
+
+    success: function(result){
+        // call the function that handles the response/results
+        var grid =  $('#container');
+        result.urls.forEach(url => {
+          let html = `
+               <div class="box">
+                  <img src="${url}">
+              </div> 
+          `
+          grid.prepend(html)
+        })
+    },
+
+    error: function(){
+        console.log('error');
+    }
+  });
+
     })
 
   </script>
