@@ -1,0 +1,197 @@
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
+import cv2
+import os
+import numpy as np
+# from numpy import argmax
+# from werkzeug.utils import secure_filename
+import json
+
+BUCKET_NAME = 'image-store-5225'
+TABLE_NAME = 'images'
+
+LABELS = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic', 'light',
+          'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
+          'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+          'skis', 'snowboard', 'sports ball', 'kite', 'baseball bat', 'baseball glove', 'skateboard', 'surfboard',
+          'tennis racket', 'bottle', 'wine glass', 'cup', 'fork', 'knife', 'spoon', 'bowl', 'banana', 'apple',
+          'sandwich', 'orange', 'carrot', 'pizza', 'cake', 'chair', 'sofa', 'bed', 'diningtable', 'toilet',
+          'tvmonitor', 'laptop', 'mouse', 'remote', 'keyboard', 'cell phone', 'microwave', 'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock', 'vase', 'scissors', 'teddy bear', 'hair drier', 'toothbrush']
+
+client = boto3.client('dynamodb')
+
+confthres = 0.3
+nmsthres = 0.1
+
+
+def put_dynamo(obj_class, img_url):
+    data = client.put_item(
+        TableName=TABLE_NAME,
+        Item={
+            "id": {
+                "S": obj_class
+            },
+            "urls": {
+                "L": [
+                    {
+                        "S": img_url
+                    }
+                ]
+            }
+        },
+    )
+
+    return obj_class + ' created'
+
+
+def update_dynamo(obj_class, img_url):
+
+    new_urls = {
+        "L": [
+            {
+                "S": img_url
+            }
+        ]
+    }
+
+    data = client.update_item(
+        TableName=TABLE_NAME,
+        ConditionExpression="attribute_not_exists({})".format(obj_class),
+        Key={
+            'id': {
+                'S': obj_class
+            }
+        },
+        UpdateExpression="SET #l = list_append(#l, :vals)",
+        ExpressionAttributeNames={
+            "#l":  'urls'
+        },
+        ExpressionAttributeValues={
+            ":vals":  new_urls
+        }
+    )
+
+    return obj_class + ' updated'
+
+
+def do_prediction(image, net, LABELS):
+    """Perform object detection.
+
+    :param image: Image to process in base64
+    :param net: Object Detection model
+    :param LABELS: Possible class labels
+    """
+
+    (H, W) = image.shape[:2]
+    # determine only the *output* layer names that we need from YOLO
+    ln = net.getLayerNames()
+    ln = [ln[i[0] - 1] for i in net.getUnconnectedOutLayers()]
+
+    blob = cv2.dnn.blobFromImage(image, 1 / 255.0, (416, 416),
+                                 swapRB=True, crop=False)
+    net.setInput(blob)
+    layerOutputs = net.forward(ln)
+
+    boxes = []
+    confidences = []
+    classIDs = []
+
+    # loop over each of the layer outputs
+    for output in layerOutputs:
+        # loop over each of the detections
+        for detection in output:
+            # extract the class ID and confidence (i.e., probability) of
+            # the current object detection
+            scores = detection[5:]
+            # print(scores)
+            classID = np.argmax(scores)
+            # print(classID)
+            confidence = scores[classID]
+
+            # filter out weak predictions by ensuring the detected
+            # probability is greater than the minimum probability
+            if confidence > confthres:
+                # scale the bounding box coordinates back relative to the
+                # size of the image, keeping in mind that YOLO actually
+                # returns the center (x, y)-coordinates of the bounding
+                # box followed by the boxes' width and height
+                box = detection[0:4] * np.array([W, H, W, H])
+                (centerX, centerY, width, height) = box.astype("int")
+
+                # use the center (x, y)-coordinates to derive the top and
+                # and left corner of the bounding box
+                x = int(centerX - (width / 2))
+                y = int(centerY - (height / 2))
+
+                # update our list of bounding box coordinates, confidences,
+                # and class IDs
+                boxes.append([x, y, int(width), int(height)])
+
+                confidences.append(float(confidence))
+                classIDs.append(classID)
+
+    # apply non-maxima suppression to suppress weak, overlapping bounding boxes
+    idxs = cv2.dnn.NMSBoxes(boxes, confidences, confthres,
+                            nmsthres)
+
+    objects = []
+    if len(idxs) > 0:
+        # loop over the indexes we are keeping
+        for i in idxs.flatten():
+            if confidences[i] > 0.5:
+                # Create an object describing the object -> label, confidence and bounding box
+                objects.append(LABELS[i])
+
+    return objects
+
+
+def lambda_handler(event, context):
+    if event:
+
+        s3 = boto3.client("s3")
+
+        dynamoDB = boto3.client('dynamodb')
+
+        # Fetching image filename from s3 bucket
+        print("Event: ", event)  #
+        file_obj = event["Records"][0]  #
+        filename = str(file_obj['s3']['object']['key'])  #
+        print('filename: ', filename)
+
+        # Get url from of the images from the s3 bucket testuploadimagedte'
+
+        s3_url = s3.generate_presigned_url('get_object',
+                                           Params={'Bucket': BUCKET_NAME, 'Key': filename})  #
+        s3_url_test = (s3_url.split("?"))  #
+        print(s3_url_test)  #
+
+        # converts the image file to numpy array
+        fileObj = s3.get_object(Bucket=BUCKET_NAME, Key=filename)  #
+        file_content = fileObj["Body"].read()  #
+        np_array = np.fromstring(file_content, np.uint8)  #
+        image_np = cv2.imdecode(np_array, cv2.IMREAD_COLOR)  #
+
+        net_obj = cv2.dnn.readNet(
+            '/opt/yolo_tiny_configs/yolov3-tiny.weights', '/opt/yolo_tiny_configs/yolov3-tiny.cfg')
+
+        objects = do_prediction(image_np, net_obj, LABELS)
+
+        added_dynamo_refs = []
+        for obj in objects:
+            # added_dynamo_refs.append(update_dynamo(obj, s3_url))
+
+            try:
+                added_dynamo_refs.append(update_dynamo(obj, s3_url))
+            except Exception as e:
+                added_dynamo_refs.append(put_dynamo(obj, s3_url))
+
+        response = {
+            'statusCode': 200,
+            'body': "Succesfully added/updated stuff: {}".format(" ".join(added_dynamo_refs)),
+            'headers': {
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*'
+            },
+        }
+
+        return response
