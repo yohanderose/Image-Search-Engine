@@ -6,6 +6,9 @@ import numpy as np
 # from numpy import argmax
 # from werkzeug.utils import secure_filename
 import json
+import io 
+import base64
+import re
 
 BUCKET_NAME = 'image-store-5225'
 TABLE_NAME = 'images'
@@ -144,32 +147,38 @@ def do_prediction(image, net, LABELS):
 
     return objects
 
+def decode_base64(data, altchars=b'+/'):
+    """Decode base64, padding being optional.
+
+    :param data: Base64 data as an ASCII byte string
+    :returns: The decoded byte string.
+
+    """
+    data = re.sub(rb'[^a-zA-Z0-9%s]+' % altchars, b'', data)  # normalize
+    missing_padding = len(data) % 4
+    if missing_padding:
+        data += b'='* (4 - missing_padding)
+    return base64.b64decode(data, altchars)
 
 def lambda_handler(event, context):
     if event:
 
         s3 = boto3.client("s3")
 
-        dynamoDB = boto3.client('dynamodb')
-
-        # Fetching image filename from s3 bucket
-        print("Event: ", event)  #
-        file_obj = event["Records"][0]  #
-        filename = str(file_obj['s3']['object']['key'])  #
-        print('filename: ', filename)
+        filename = json.loads(event['body'])['filename']
+        print("FILENAME", filename)
 
         # Get url from of the images from the s3 bucket testuploadimagedte'
 
         s3_url = s3.generate_presigned_url('get_object',
-                                           Params={'Bucket': BUCKET_NAME, 'Key': filename})  #
-        s3_url_test = (s3_url.split("?"))  #
-        print(s3_url_test)  #
+                                          Params={'Bucket': BUCKET_NAME, 'Key': filename})  #
 
-        # converts the image file to numpy array
+
         fileObj = s3.get_object(Bucket=BUCKET_NAME, Key=filename)  #
-        file_content = fileObj["Body"].read()  #
-        np_array = np.fromstring(file_content, np.uint8)  #
-        image_np = cv2.imdecode(np_array, cv2.IMREAD_COLOR)  #
+        file_content = fileObj["Body"].read()
+        decoded = decode_base64(file_content)
+        np_array = np.fromstring(decoded, np.uint8)
+        image_np = cv2.imdecode(np_array, cv2.IMREAD_COLOR)  
 
         net_obj = cv2.dnn.readNet(
             '/opt/yolo_tiny_configs/yolov3-tiny.weights', '/opt/yolo_tiny_configs/yolov3-tiny.cfg')
@@ -178,8 +187,6 @@ def lambda_handler(event, context):
 
         added_dynamo_refs = []
         for obj in objects:
-            # added_dynamo_refs.append(update_dynamo(obj, s3_url))
-
             try:
                 added_dynamo_refs.append(update_dynamo(obj, s3_url))
             except Exception as e:
