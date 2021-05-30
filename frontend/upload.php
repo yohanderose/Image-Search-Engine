@@ -59,8 +59,9 @@ $base64 = base64_encode($img_data);
 echo "\n" . $base64;
 
 // Send data to S3
-$url = " https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/upload-to-s3-new";
+$url = " https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/upload-to-s3";
 $data = array('name' => htmlspecialchars(basename($_FILES["fileToUpload"]["name"])), 'image' => ($base64));
+
 
 // use key 'http' even if you send the request to https://...
 $options = array(
@@ -77,8 +78,9 @@ $result = file_get_contents($url, false, $context);
 unlink($target_file);
 
 $newURL = "http://ec2-3-235-253-98.compute-1.amazonaws.com/";
-if ($result === FALSE) {
-	echo 'Errors encountered! Check this new1';
+
+if ($result === FALSE) { 
+	echo 'Errors encountered. Check this!';
 } else {
 	header('Location: ' . $newURL);
 }
