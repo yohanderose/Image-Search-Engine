@@ -57,7 +57,7 @@ if ($uploadOk == 0) {
 $path = $target_file;
 $type = pathinfo($path, PATHINFO_EXTENSION);
 $img_data = file_get_contents($path);
-// $base64 = 'data:image/' . $type . ';base64,' . base64_encode($img_data);
+//$base64 = 'data:image/' . $type . ';base64,' . base64_encode($img_data);
 $base64 = base64_encode($img_data);
 echo "\n" . $base64;
 
@@ -82,7 +82,7 @@ unlink($target_file);
 
 $newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
 
-if ($result === FALSE) { 
+if ($result === FALSE) {
 	echo 'Errors encountered. Check this!';
 } 
 // else {

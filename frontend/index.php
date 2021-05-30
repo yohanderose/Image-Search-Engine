@@ -1,7 +1,4 @@
 <?php
-
-
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,8 +21,6 @@
 			text-align: justify;
 			-ms-text-justify: distribute-all-lines;
 			text-justify: distribute-all-lines;
-
-
 		}
 
 		.box {
@@ -108,6 +103,7 @@
 	</style>
 
 	<button onclick="return login();">Sign In</button>
+	<button onclick="return logout();">Sign Out</button>
 
 	<form id="search" method='post'>
 
@@ -133,9 +129,39 @@
 	</div>
 
 	<script>
+		var grid = $('#container');
+
 		function login() {
-			window.location = "https://imgdetectntestdemo.auth.us-east-1.amazoncognito.com/login?client_id=dtqh7o342i2pfe2iad62e811v&response_type=token&scope=email+openid+profile&redirect_uri=https://ec2-3-235-253-98.compute-1.amazonaws.com/"
+			window.location = "https://imgdetectntestdemo.auth.us-east-1.amazoncognito.com/login?client_id=dtqh7o342i2pfe2iad62e811v&response_type=token&scope=email+openid+profile&redirect_uri=https://ec2-3-235-253-98.compute-1.amazonaws.com/";
 		}
+
+		function logout() {
+			window.location = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
+		}
+
+		fetchImages = async (url) => {
+			let imgName = url.split("?")[0].split("/").pop()
+			//console.log(imgName)
+
+			let html = `
+               <div class="box">
+				<button class="delete-button">Delete</button>
+                  <img id="${imgName}" src="${url}">
+              </div> 
+          `
+			grid.prepend(html)
+		}
+
+		document.addEventListener("click", boxListener);
+
+		function boxListener(event) {
+			var element = event.target;
+			if (element.classList.contains("delete-button")) {
+				let imgName = element.nextElementSibling.id;
+				console.log(imgName);
+			}
+		}
+
 
 		$('#search-submit').on('click', () => {
 			var queryString = $('#query').val();
@@ -150,14 +176,8 @@
 
 				success: function(result) {
 					// call the function that handles the response/results
-					var grid = $('#container');
 					result.urls.forEach(url => {
-						let html = `
-               <div class="box">
-                  <img src="${url}">
-              </div> 
-          `
-						grid.prepend(html)
+						fetchImages(url);
 					})
 				},
 
