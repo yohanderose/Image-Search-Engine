@@ -3,15 +3,16 @@ from boto3.dynamodb.conditions import Key, Attr
 import cv2
 import os
 import numpy as np
+# from numpy import argmax
+# from werkzeug.utils import secure_filename
 import json
-import io 
+import io
 import base64
 import re
 
 BUCKET_NAME = 'image-store-5225'
 TABLE_NAME = 'images'
 
-# Load all the objects that can be detected
 LABELS = ['person', 'bicycle', 'car', 'motorbike', 'aeroplane', 'bus', 'train', 'truck', 'boat', 'traffic', 'light',
           'fire hydrant', 'stop sign', 'parking meter', 'bench', 'bird', 'cat', 'dog', 'horse', 'sheep', 'cow',
           'elephant', 'bear', 'zebra', 'giraffe', 'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
@@ -25,7 +26,7 @@ client = boto3.client('dynamodb')
 confthres = 0.3
 nmsthres = 0.1
 
-# Function to put the image url and its objects
+
 def put_dynamo(obj_class, img_url):
     data = client.put_item(
         TableName=TABLE_NAME,
@@ -45,7 +46,7 @@ def put_dynamo(obj_class, img_url):
 
     return obj_class + ' created'
 
-# Function to update the image url and its objects
+
 def update_dynamo(obj_class, img_url):
 
     new_urls = {
@@ -146,6 +147,7 @@ def do_prediction(image, net, LABELS):
 
     return objects
 
+
 def decode_base64(data, altchars=b'+/'):
     """Decode base64, padding being optional.
 
@@ -156,8 +158,9 @@ def decode_base64(data, altchars=b'+/'):
     data = re.sub(rb'[^a-zA-Z0-9%s]+' % altchars, b'', data)  # normalize
     missing_padding = len(data) % 4
     if missing_padding:
-        data += b'='* (4 - missing_padding)
+        data += b'=' * (4 - missing_padding)
     return base64.b64decode(data, altchars)
+
 
 def lambda_handler(event, context):
     if event:
@@ -170,15 +173,14 @@ def lambda_handler(event, context):
         # Get url from of the images from the s3 bucket testuploadimagedte'
 
         s3_url = s3.generate_presigned_url('get_object',
-                                          Params={'Bucket': BUCKET_NAME, 'Key': filename})  
+                                           Params={'Bucket': BUCKET_NAME, 'Key': filename})  #
 
-
-        fileObj = s3.get_object(Bucket=BUCKET_NAME, Key=filename)  
+        fileObj = s3.get_object(Bucket=BUCKET_NAME, Key=filename)  #
         file_content = fileObj["Body"].read()
         decoded = decode_base64(file_content)
         np_array = np.fromstring(decoded, np.uint8)
-        image_np = cv2.imdecode(np_array, cv2.IMREAD_COLOR)  
-        # Read the required files to run yolo algorithem
+        image_np = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+
         net_obj = cv2.dnn.readNet(
             '/opt/yolo_tiny_configs/yolov3-tiny.weights', '/opt/yolo_tiny_configs/yolov3-tiny.cfg')
 
@@ -201,3 +203,4 @@ def lambda_handler(event, context):
         }
 
         return response
+

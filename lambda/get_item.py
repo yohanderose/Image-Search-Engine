@@ -8,14 +8,16 @@ client = boto3.client('dynamodb')
 
 def lambda_handler(event, context):
 
-    # req = event['body']
-    # req_data = dict(qc.split("=") for qc in req.split("&"))
+    req = event['body']
+    req_data = dict(qc.split("=") for qc in req.split("&"))
+    print(req_data)
+    query = req_data['query']
 
     data = client.get_item(
         TableName='images',
         Key={
             'id': {
-                'S': 'person'
+                'S': query
             }
         }
     )
@@ -33,4 +35,3 @@ def lambda_handler(event, context):
     }
 
     return response
-
