@@ -1,6 +1,10 @@
 *.jpg
 images.db
 inputfolder/*
+node_modules/
+package-lock.json
+*.key
+*.crt
 
 ### Flask ###
 instance/*

@@ -1,5 +1,8 @@
 <?php
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+
 $target_dir = "uploads/";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
 $uploadOk = 1;
@@ -59,7 +62,7 @@ $base64 = base64_encode($img_data);
 echo "\n" . $base64;
 
 // Send data to S3
-$url = " https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/upload-to-s3";
+$url = "https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/upload-to-s3";
 $data = array('name' => htmlspecialchars(basename($_FILES["fileToUpload"]["name"])), 'image' => ($base64));
 
 
@@ -77,10 +80,11 @@ $result = file_get_contents($url, false, $context);
 // Remove uploaded file from server
 unlink($target_file);
 
-$newURL = "http://ec2-3-235-253-98.compute-1.amazonaws.com/";
+$newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
 
 if ($result === FALSE) { 
 	echo 'Errors encountered. Check this!';
-} else {
-	header('Location: ' . $newURL);
-}
+} 
+// else {
+// 	header('Location: ' . $newURL);
+// }
