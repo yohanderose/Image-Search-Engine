@@ -148,7 +148,7 @@
 				<button class="delete-button">Delete</button>
                   <img id="${imgName}" src="${url}">
               </div> 
-          `
+			  `
 			grid.prepend(html)
 		}
 
@@ -158,7 +158,25 @@
 			var element = event.target;
 			if (element.classList.contains("delete-button")) {
 				let imgName = element.nextElementSibling.id;
+				let imgUrl = element.nextElementSibling.src;
 				console.log(imgName);
+				$.ajax({
+					type: 'POST',
+					data: {
+						imgUrl: imgUrl,
+						imgName: imgName,
+					},
+					url: 'delete.php',
+					dataType: 'json',
+
+					success: function(result) {
+						console.log('success');
+					},
+
+					error: function() {
+						console.log('error');
+					}
+				});
 			}
 		}
 
