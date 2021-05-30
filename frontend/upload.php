@@ -76,7 +76,7 @@ unlink($target_file);
 
 $newURL = "http://ec2-3-235-253-98.compute-1.amazonaws.com/";
 if ($result === FALSE) { 
-	echo 'Errors encountered!';
+	echo 'Errors encountered. Check this!';
 } else {
 	header('Location: '.$newURL);
 }
