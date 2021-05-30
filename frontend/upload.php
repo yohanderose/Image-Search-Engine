@@ -56,7 +56,8 @@ $base64 = base64_encode($img_data);
 echo "\n" . $base64;
 
 // Send data to S3
-$url = " https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/get-items";
+// $url = " https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/get-items";
+$url = " https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/upload-to-s3";
 $data = array('name' => htmlspecialchars( basename( $_FILES["fileToUpload"]["name"])), 'image' => ($base64));
 
 // use key 'http' even if you send the request to https://...
