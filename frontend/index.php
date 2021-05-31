@@ -140,8 +140,11 @@
 			//window.location = "https://ec2-3-235-253-98.compute-1.amazonaws.com/logout?client_id=dtqh7o342i2pfe2iad62e811v&redirect_uri=https://ec2-3-235-253-98.compute-1.amazonaws.com/";
 		}
 
-		fetchImages = async (url) => {
+		fetchImages = async (url_) => {
+			let url = decodeURIComponent(url_);
 			let imgName = url.split("?")[0].split("/").pop()
+			console.log(url)
+			console.log(imgName)
 
 			let html = `
                <div class="box">

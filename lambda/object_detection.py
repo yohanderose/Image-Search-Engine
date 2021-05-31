@@ -172,8 +172,9 @@ def lambda_handler(event, context):
 
         # Get url from of the images from the s3 bucket testuploadimagedte'
 
-        s3_url = s3.generate_presigned_url('get_object',
-                                           Params={'Bucket': BUCKET_NAME, 'Key': filename})  #
+        # s3_url = s3.generate_presigned_url('get_object',
+        #                                   Params={'Bucket': BUCKET_NAME, 'Key': filename})  #
+        s3_url = filename
 
         fileObj = s3.get_object(Bucket=BUCKET_NAME, Key=filename)  #
         file_content = fileObj["Body"].read()
