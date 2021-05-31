@@ -12,6 +12,7 @@
 	<script src="https://code.jquery.com/jquery-3.6.0.js" integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
 
 	<script src="https://sdk.amazonaws.com/js/aws-sdk-2.7.16.min.js"></script>
+
 </head>
 
 <body>
@@ -104,6 +105,7 @@
 
 	<button onclick="return login();">Sign In</button>
 	<button onclick="return logout();">Sign Out</button>
+
 
 	<form id="search" method='post'>
 
