@@ -1,4 +1,10 @@
 <?php
+
+if (isset($_GET['imgName']) && isset($_GET['imgUrl'])) {
+	echo "Selected Image: " . $_GET['imgName'];
+} else {
+	echo 'not found';
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -102,23 +108,15 @@
 		}
 	</style>
 
-	<button onclick="return login();">Sign In</button>
-	<button onclick="return logout();">Sign Out</button>
-
-	<form id="search" method='post'>
-
-		<div class="topnav">
-			<input type="text" name="query" id="query" placeholder="Search..">
-			<input id="search-submit" type="button" value="Go">
-
+	<form action="addTags.php" method="post" enctype="multipart/form-data">
+		<div class="box">
+			<img id="<?php echo $_GET["imgName"]; ?>" src="<?php echo $_GET["imgUrl"]; ?>">
 		</div>
-
-	</form>
-
-	<form action="upload.php" method="post" enctype="multipart/form-data">
-		Select image to upload:
-		<input type="file" name="fileToUpload" id="fileToUpload">
-		<input type="submit" value="Upload Image" name="submit">
+		<input name="imgUrl" type="text" id="imgUrl" value="<?php echo urlencode($_GET["imgUrl"]); ?>">
+		<br>
+		<label name="inputLabel">New Tags: </label>
+		<input type="text" name="newTags" id="newTags">
+		<input type="submit" value="Append Tags" name="submit">
 	</form>
 
 
@@ -131,22 +129,12 @@
 	<script>
 		var grid = $('#container');
 
-		function login() {
-			window.location = "https://imgdetectntestdemo.auth.us-east-1.amazoncognito.com/login?client_id=dtqh7o342i2pfe2iad62e811v&response_type=token&scope=email+openid+profile&redirect_uri=https://ec2-3-235-253-98.compute-1.amazonaws.com/";
-		}
-
-		function logout() {
-			window.location = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
-		}
-
 		fetchImages = async (url) => {
 			let imgName = url.split("?")[0].split("/").pop()
 			//console.log(imgName)
 
 			let html = `
                <div class="box">
-				<button class="edit-button">Edit</button>
-				<button class="delete-button">Delete</button>
                   <img id="${imgName}" src="${url}">
               </div> 
 			  `
@@ -159,11 +147,26 @@
 			var element = event.target;
 			if (element.classList.contains("edit-button")) {
 				let imgName = element.nextElementSibling.nextElementSibling.id;
-				let imgUrl = encodeURIComponent(element.nextElementSibling.nextElementSibling.src);
+				let imgUrl = element.nextElementSibling.nextElementSibling.src;
 				console.log(imgName);
-				window.location = `editPage.php?imgName=${imgName}&imgUrl=${imgUrl}`;
-			}
+				$.ajax({
+					type: 'POST',
+					data: {
+						imgUrl: imgUrl,
+						imgName: imgName,
+					},
+					url: 'editTags.php',
+					dataType: 'json',
 
+					success: function(result) {
+						console.log('success');
+					},
+
+					error: function() {
+						console.log('error');
+					}
+				});
+			}
 			if (element.classList.contains("delete-button")) {
 				let imgName = element.nextElementSibling.id;
 				let imgUrl = element.nextElementSibling.src;
