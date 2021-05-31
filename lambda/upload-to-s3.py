@@ -6,8 +6,10 @@ import typing
 import time
 from urllib.parse import unquote
 import io
+import uuid
 
 s3 = boto3.client('s3')
+BUCKET_NAME = 'image-store-5225'
 
 
 def invokeLambdaFunction(*, functionName: str = None, payload: typing.Mapping[str, str] = None):
@@ -49,16 +51,29 @@ def decode_base64_file(data):
     return io.BytesIO(decoded_file)
 
 
+def check_key(key, file_extension):
+    temp = boto3.resource('s3')
+
+    try:
+        temp.Object(BUCKET_NAME, key).load()
+        return str(uuid.uuid1()) + '.' + file_extension
+    except Exception as e:
+        return key
+
+
 def lambda_handler(event, context):
     data_ = event['body']
     data = dict(qc.split("=") for qc in data_.split("&"))
-    # print(data['name'])
-    name = data['name']
-    image = unquote(data['image'])
 
+    name = data['name']
+    ext = name.split('.')[-1]
+    name = check_key(name, ext)
+    print(name)
+
+    image = unquote(data['image'])
     image = decode_base64_file(image)
 
-    s3.put_object(Bucket='image-store-5225', Key=name, Body=image)
+    s3.put_object(Bucket=BUCKET_NAME, Key=name, Body=image)
 
     response = {'statusCode': 200, 'body': json.dumps({'filename': name}), 'headers': {
         'Access-Control-Allow-Origin': '*'}}
