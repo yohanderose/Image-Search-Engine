@@ -1,4 +1,14 @@
 <?php
+
+if (isset($_GET['uploaded'])) {
+	echo '<script>alert("image uploaded")</script>';
+}
+
+if (isset($_GET['updatedTags'])) {
+	echo '<script>alert("tags updated")</script>';
+}
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -190,6 +200,8 @@
 						console.log('error');
 					}
 				});
+				alert(`${imgName} deleted`)
+				window.location = 'index.php'
 			}
 		}
 

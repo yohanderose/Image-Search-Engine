@@ -80,7 +80,7 @@ $result = file_get_contents($url, false, $context);
 // Remove uploaded file from server
 unlink($target_file);
 
-$newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
+$newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/index.php?uploaded=1";
 
 //if ($result === FALSE) {
 //echo 'Errors encountered. Check this!';

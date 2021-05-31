@@ -23,6 +23,7 @@ if ($_POST["imgUrl"] && $_POST["newTags"]) {
 	$context  = stream_context_create($options);
 	$result = file_get_contents($url, false, $context);
 
-	$newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
+	$newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/index.php?updatedTags=1";
+
 	header('Location: ' . $newURL);
 }
