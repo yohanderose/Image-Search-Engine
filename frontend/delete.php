@@ -6,7 +6,7 @@ ini_set('display_startup_errors', 1);
 if ($_POST["imgUrl"] && $_POST["imgName"]) {
 
 	$url = "https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/delete-items";
-	$data = array('imgUrl' => $_POST["imgUrl"], 'imgName' => $_POST["imgName"]);
+	$data = array('imgUrl' => $_POST["imgName"], 'imgName' => $_POST["imgName"]);
 
 	// use key 'http' even if you send the request to https://...
 	$options = array(
