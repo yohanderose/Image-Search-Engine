@@ -1,7 +1,7 @@
 <?php
 
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
+//ini_set('display_errors', 1);
+//ini_set('display_startup_errors', 1);
 
 $target_dir = "uploads/";
 $target_file = $target_dir . basename($_FILES["fileToUpload"]["name"]);
@@ -47,7 +47,7 @@ if ($uploadOk == 0) {
 	// if everything is ok, try to upload file
 } else {
 	if (move_uploaded_file($_FILES["fileToUpload"]["tmp_name"], $target_file)) {
-		echo "The file " . htmlspecialchars(basename($_FILES["fileToUpload"]["name"])) . " has been uploaded.";
+		//echo "The file " . htmlspecialchars(basename($_FILES["fileToUpload"]["name"])) . " has been uploaded.";
 	} else {
 		echo "Sorry, there was an error uploading your file.";
 	}
@@ -57,9 +57,9 @@ if ($uploadOk == 0) {
 $path = $target_file;
 $type = pathinfo($path, PATHINFO_EXTENSION);
 $img_data = file_get_contents($path);
-//$base64 = 'data:image/' . $type . ';base64,' . base64_encode($img_data);
-$base64 = base64_encode($img_data);
-echo "\n" . $base64;
+$base64 = 'data:image/' . $type . ';base64,' . base64_encode($img_data);
+//$base64 = base64_encode($img_data);
+//echo "\n" . $base64;
 
 // Send data to S3
 $url = "https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/upload-to-s3";
@@ -82,9 +82,7 @@ unlink($target_file);
 
 $newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
 
-if ($result === FALSE) {
-	echo 'Errors encountered. Check this!';
-} 
-// else {
-// 	header('Location: ' . $newURL);
-// }
+//if ($result === FALSE) {
+//echo 'Errors encountered. Check this!';
+//} 
+header('Location: ' . $newURL);

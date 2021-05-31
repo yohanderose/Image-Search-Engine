@@ -142,13 +142,12 @@
 
 		fetchImages = async (url) => {
 			let imgName = url.split("?")[0].split("/").pop()
-			//console.log(imgName)
 
 			let html = `
                <div class="box">
 				<button class="edit-button">Edit</button>
 				<button class="delete-button">Delete</button>
-                  <img id="${imgName}" src="${url}">
+                  <img id="${imgName}" style="width:inherit; height:inherit;" src="${url}">
               </div> 
 			  `
 			grid.prepend(html)
@@ -192,6 +191,7 @@
 
 		$('#search-submit').on('click', () => {
 			var queryString = $('#query').val();
+			grid.html('');
 
 			$.ajax({
 				type: 'POST',

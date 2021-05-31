@@ -4,6 +4,9 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 
 $query_string = $_POST['query'];
+$query_string = explode(' ', ($query_string));
+$query_string = implode('-', $query_string);
+
 $url = "https://qlpvexadf5.execute-api.us-east-1.amazonaws.com/testing/get-items";
 $data = array('query' => htmlspecialchars($query_string));
 

@@ -5,7 +5,7 @@ import boto3
 import typing
 import time
 from urllib.parse import unquote
-from io import BytesIO
+import io
 
 s3 = boto3.client('s3')
 
@@ -24,6 +24,31 @@ def invokeLambdaFunction(*, functionName: str = None, payload: typing.Mapping[st
     return response
 
 
+def get_file_extension(file_name, decoded_file):
+    extension = imghdr.what(file_name, decoded_file)
+    extension = "jpg" if extension == "jpeg" else extension
+    return extension
+
+
+def decode_base64_file(data):
+    """
+    Fuction to convert base 64 to readable IO bytes and auto-generate file name with extension
+    :param data: base64 file input
+    :return: tuple containing IO bytes file and filename
+    """
+    if 'data:' in data and ';base64,' in data:
+        # Break out the header from the base64 content
+        header, data = data.split(';base64,')
+
+    # Try to decode the file. Return validation error if it fails.
+    try:
+        decoded_file = base64.b64decode(data)
+    except TypeError:
+        TypeError('invalid_image')
+
+    return io.BytesIO(decoded_file)
+
+
 def lambda_handler(event, context):
     data_ = event['body']
     data = dict(qc.split("=") for qc in data_.split("&"))
@@ -31,11 +56,7 @@ def lambda_handler(event, context):
     name = data['name']
     image = unquote(data['image'])
 
-    # im_b64 = base64.b64encode(f.read())
-
-    # im_bytes = base64.b64decode(im_b64)   # im_bytes is a binary image
-    # im_file = BytesIO(im_bytes)  # convert image to file-like object
-    # img = Image.open(im_file)   # img is now PIL Image object
+    image = decode_base64_file(image)
 
     s3.put_object(Bucket='image-store-5225', Key=name, Body=image)
 
@@ -43,4 +64,3 @@ def lambda_handler(event, context):
         'Access-Control-Allow-Origin': '*'}}
     res = invokeLambdaFunction(functionName='trigger-test', payload=response)
     return response
-

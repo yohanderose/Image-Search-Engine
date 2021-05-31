@@ -177,9 +177,14 @@ def lambda_handler(event, context):
 
         fileObj = s3.get_object(Bucket=BUCKET_NAME, Key=filename)  #
         file_content = fileObj["Body"].read()
-        decoded = decode_base64(file_content)
-        np_array = np.fromstring(decoded, np.uint8)
+        # decoded = decode_base64(file_content)
+        # np_array = np.fromstring(decoded, np.uint8)
+
+        np_array = np.frombuffer(file_content, dtype=np.int8)
         image_np = cv2.imdecode(np_array, cv2.IMREAD_COLOR)
+
+        print(np_array.shape)
+        print(image_np.shape)
 
         net_obj = cv2.dnn.readNet(
             '/opt/yolo_tiny_configs/yolov3-tiny.weights', '/opt/yolo_tiny_configs/yolov3-tiny.cfg')
@@ -203,4 +208,3 @@ def lambda_handler(event, context):
         }
 
         return response
-

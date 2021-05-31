@@ -24,10 +24,5 @@ if ($_POST["imgUrl"] && $_POST["newTags"]) {
 	$result = file_get_contents($url, false, $context);
 
 	$newURL = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
-	if ($result === FALSE) {
-		echo 'Errors encountered. Check this!';
-	}
-	// else {
-	// 	header('Location: ' . $newURL);
-	// }
+	header('Location: ' . $newURL);
 }

@@ -110,8 +110,9 @@ if (isset($_GET['imgName']) && isset($_GET['imgUrl'])) {
 
 	<form action="addTags.php" method="post" enctype="multipart/form-data">
 		<div class="box">
-			<img id="<?php echo $_GET["imgName"]; ?>" src="<?php echo $_GET["imgUrl"]; ?>">
+			<img style="width: 90vw;" id="<?php echo $_GET["imgName"]; ?>" src="<?php echo $_GET["imgUrl"]; ?>">
 		</div>
+		<br>
 		<input name="imgUrl" type="hidden" id="imgUrl" value="<?php echo urlencode($_GET["imgUrl"]); ?>">
 		<br>
 		<label name="inputLabel">New Tags: </label>
