@@ -20,4 +20,3 @@ $images = json_decode($result);
 
 
 echo $result;
-

@@ -136,7 +136,8 @@
 		}
 
 		function logout() {
-			window.location = "https://ec2-3-235-253-98.compute-1.amazonaws.com/";
+			window.location = "logout.php"
+			//window.location = "https://ec2-3-235-253-98.compute-1.amazonaws.com/logout?client_id=dtqh7o342i2pfe2iad62e811v&redirect_uri=https://ec2-3-235-253-98.compute-1.amazonaws.com/";
 		}
 
 		fetchImages = async (url) => {

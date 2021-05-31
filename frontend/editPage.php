@@ -112,7 +112,7 @@ if (isset($_GET['imgName']) && isset($_GET['imgUrl'])) {
 		<div class="box">
 			<img id="<?php echo $_GET["imgName"]; ?>" src="<?php echo $_GET["imgUrl"]; ?>">
 		</div>
-		<input name="imgUrl" type="text" id="imgUrl" value="<?php echo urlencode($_GET["imgUrl"]); ?>">
+		<input name="imgUrl" type="hidden" id="imgUrl" value="<?php echo urlencode($_GET["imgUrl"]); ?>">
 		<br>
 		<label name="inputLabel">New Tags: </label>
 		<input type="text" name="newTags" id="newTags">
